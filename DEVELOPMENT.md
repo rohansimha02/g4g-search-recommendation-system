@@ -18,3 +18,9 @@
 - Recommendation generation: 6-15ms  
 - Cache hit ratio: 85%
 - API uptime: 99.9%
+
+## Recommendation System
+- Hybrid algorithm: 80% content + 20% title similarity
+- Confidence scoring: High/Medium/Low tiers
+- Real-time inference with pre-computed matrices
+- Transparent scoring for explainable AI
