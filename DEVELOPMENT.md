@@ -24,3 +24,10 @@
 - Confidence scoring: High/Medium/Low tiers
 - Real-time inference with pre-computed matrices
 - Transparent scoring for explainable AI
+
+## Frontend Development
+- React 18 with functional components and hooks
+- Tailwind CSS for responsive design
+- Real-time search with debouncing
+- Side-panel recommendations UI
+- Professional portfolio-ready interface
