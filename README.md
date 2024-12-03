@@ -7,6 +7,12 @@ A sophisticated AI-powered search and recommendation system built for GeeksforGe
 [![Python](https://img.shields.io/badge/Python-3.9+-green?logo=python)](flask-server/requirements.txt)
 [![Machine Learning](https://img.shields.io/badge/ML-TF--IDF%20%2B%20BM25-orange)](flask-server/system.py)
 
+## 🚀 Live Demo
+
+> **Backend API**: Ready for deployment on Railway/Render  
+> **Frontend**: Ready for deployment on Vercel/Netlify  
+> **Full-Stack**: Complete search and recommendation system
+
 ## Core Features
 
 ### AI-Powered Hybrid Recommendations
