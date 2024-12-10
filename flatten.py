@@ -108,12 +108,10 @@ def process_geeks_directory(root_folder, output_file):
                 data['relative_path'] = os.path.relpath(root, root_folder)
 
                 processed_data.append(data)
-                print(f"Processed: {topic} (ID: {data['docid']})")
-
-                doc_counter += 1  # Increment counter for next document
+                doc_counter += 1
 
             except Exception as e:
-                print(f"Error processing {file_path}: {str(e)}")
+                continue
 
     # Write to CSV
     if processed_data:
@@ -122,9 +120,6 @@ def process_geeks_directory(root_folder, output_file):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(processed_data)
-        print(f"\nSuccessfully saved {len(processed_data)} entries to {output_file}")
-    else:
-        print("No data was processed!")
 
 # Example usage
 if __name__ == "__main__":

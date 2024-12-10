@@ -1,8 +1,20 @@
 {
-  "name": "g4gsearchrec",
-  "version": "0.1.0",
+  "name": "geeksforgeeks-search-system",
+  "version": "1.0.0",
+  "description": "Information Retrieval System with BM25, TF-IDF, and AI-powered recommendations",
+  "author": "Rohan Simha",
+  "keywords": [
+    "search-engine",
+    "machine-learning",
+    "information-retrieval",
+    "BM25",
+    "TF-IDF",
+    "react",
+    "flask",
+    "portfolio-project"
+  ],
+  "homepage": ".",
   "private": true,
-  "proxy": "https://mdvmvbnt-5000.usw2.devtunnels.ms/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -37,6 +49,7 @@
     ]
   },
   "devDependencies": {
+    "serve": "^14.2.4",
     "tailwindcss": "^3.4.15"
   }
 }
