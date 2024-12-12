@@ -2,12 +2,8 @@
 
 A sophisticated AI-powered search and recommendation system built for GeeksforGeeks programming content, featuring hybrid machine learning algorithms, BM25 ranking, TF-IDF search, and intelligent content recommendations.
 
-[![React](https://img.shields.io/badge/React-18.x-blue?logo=react)](g4gsearchrec/)
-[![Flask](https://img.shields.io/badge/Flask-2.3.x-green?logo=flask)](flask-server/)
-[![Python](https://img.shields.io/badge/Python-3.9+-green?logo=python)](flask-server/requirements.txt)
-[![Machine Learning](https://img.shields.io/badge/ML-TF--IDF%20%2B%20BM25-orange)](flask-server/system.py)
 
-## 🚀 Live Demo
+## Live Demo
 
 > **Backend API**: Ready for deployment on Railway/Render  
 > **Frontend**: Ready for deployment on Vercel/Netlify  
