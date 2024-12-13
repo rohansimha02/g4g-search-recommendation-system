@@ -1,0 +1,19 @@
+# Environment files
+.env
+.env.local
+.env.production
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+
+# Logs
+*.log
+
+# Development files
+.DS_Store
