@@ -204,8 +204,18 @@ def initialize_tfidf_system():
         return False
 
 def initialize_bm25_background():
+    """Initialize BM25 with better error handling for deployment environments."""
     try:
-        logger.info("Initializing BM25...")
+        logger.info("Attempting BM25 initialization...")
+        
+        # Check if Java is available
+        import subprocess
+        try:
+            subprocess.run(['java', '-version'], capture_output=True, check=True, timeout=5)
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+            logger.warning("Java not available - skipping BM25 initialization")
+            return
+        
         import pyterrier as pt
         
         if os.getenv("JAVA_HOME"):
@@ -229,7 +239,7 @@ def initialize_bm25_background():
                 break
         
         if not index_path:
-            logger.warning("BM25 index not found")
+            logger.warning("BM25 index not found - using TF-IDF only")
             return
         
         # Load index and create retriever
@@ -244,7 +254,7 @@ def initialize_bm25_background():
         logger.info("BM25 initialized successfully")
         
     except Exception as e:
-        logger.warning(f"BM25 initialization failed: {e}")
+        logger.warning(f"BM25 initialization failed (using TF-IDF fallback): {e}")
 
 def perform_bm25_search(query, limit=10):
     """Perform BM25 search."""
@@ -283,8 +293,9 @@ def perform_bm25_search(query, limit=10):
         return []
 
 def perform_tfidf_search(query, limit=10):
-    """Perform TF-IDF search."""
-    if not system.tfidf_ready:
+    """Perform TF-IDF search with error handling."""
+    if not system.tfidf_ready or system.articles_df is None:
+        logger.warning("TF-IDF system not ready")
         return []
     
     try:
@@ -322,7 +333,8 @@ def generate_recommendations(input_title, limit=6):
         input_title: The article title to find recommendations for
         limit: Maximum number of recommendations to return
     """
-    if not system.tfidf_ready:
+    if not system.tfidf_ready or system.articles_df is None:
+        logger.warning("Recommendation system not ready - missing data or TF-IDF")
         return []
     
     try:
@@ -396,21 +408,38 @@ def generate_recommendations(input_title, limit=6):
 # API Endpoints
 @app.route("/health", methods=["GET"])
 def health_check():
-    """System health check."""
-    return jsonify({
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "version": "Optimal",
-        "capabilities": {
-            "tfidf_search": True,
-            "bm25_search": True,
-            "hybrid_recommendations": True
-        },
-        "metrics": {
-            "total_requests": system.request_count,
-            "cache_entries": len(system.search_cache) + len(system.recommendation_cache)
-        }
-    })
+    """System health check with actual system status."""
+    try:
+        uptime = time.time() - getattr(app, 'start_time', time.time())
+        
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "version": "Optimal",
+            "uptime_seconds": round(uptime, 2),
+            "capabilities": {
+                "tfidf_search": system.tfidf_ready,
+                "bm25_search": system.bm25_available,
+                "hybrid_recommendations": system.tfidf_ready,  # Recommendations need at least TF-IDF
+                "data_loaded": system.articles_df is not None
+            },
+            "system_info": {
+                "articles_count": len(system.articles_df) if system.articles_df is not None else 0,
+                "tfidf_ready": system.tfidf_ready,
+                "bm25_available": system.bm25_available
+            },
+            "metrics": {
+                "total_requests": system.request_count,
+                "cache_entries": len(system.search_cache) + len(system.recommendation_cache)
+            }
+        })
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return jsonify({
+            "status": "degraded",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 200  # Still return 200 so load balancer doesn't think service is down
 
 @app.route("/search", methods=["GET"])
 @rate_limit(max_requests=config.RATE_LIMIT)
@@ -452,6 +481,17 @@ def search():
         elif system.tfidf_ready:
             results = perform_tfidf_search(sanitized_query, limit)
             search_method = "TF-IDF"
+        else:
+            # No search methods available
+            return jsonify({
+                "error": "Search system not available - initializing",
+                "query": sanitized_query,
+                "system_info": {
+                    "bm25_available": system.bm25_available,
+                    "tfidf_available": system.tfidf_ready,
+                    "data_loaded": system.articles_df is not None
+                }
+            }), 503  # Service Unavailable
         
         processing_time = time.time() - start_time
         
@@ -584,34 +624,39 @@ def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
 def initialize_system():
-    """Initialize system with optimal startup."""
+    """Initialize system with optimal startup and graceful fallbacks."""
     try:
         app.start_time = time.time()
         logger.info("Starting GeeksforGeeks Optimal System...")
         
         # Phase 1: TF-IDF for immediate availability
-        if initialize_tfidf_system():
+        tfidf_success = initialize_tfidf_system()
+        if tfidf_success:
             logger.info("TF-IDF ready - search available")
         else:
-            logger.error("TF-IDF initialization failed")
-            return False
+            logger.warning("TF-IDF initialization failed - limited functionality")
         
-        # Phase 2: BM25 in background
+        # Phase 2: BM25 in background (non-blocking)
         threading.Thread(target=initialize_bm25_background, daemon=True).start()
         
         logger.info("System initialization complete")
-        return True
+        return True  # Always return True to allow server to start
         
     except Exception as e:
-        logger.error(f"Initialization failed: {e}")
-        return False
+        logger.error(f"System initialization error: {e}")
+        return True  # Still allow server to start with basic functionality
+
+# Initialize system immediately when module is imported (for Gunicorn)
+try:
+    initialize_system()
+    logger.info("System initialized for production deployment")
+except Exception as e:
+    logger.error(f"System initialization failed: {e}")
+    # Don't exit, let the app start with basic functionality
 
 if __name__ == "__main__":
-    """Main entry point."""
-    try:
-        if not initialize_system():
-            exit(1)
-        
+    """Main entry point for development."""
+    try:        
         host = os.getenv('HOST', '0.0.0.0')
         port = int(os.getenv('PORT', 5001))
         debug = os.getenv('FLASK_ENV') == 'development'
