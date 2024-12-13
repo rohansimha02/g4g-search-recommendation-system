@@ -1,11 +1,30 @@
 services:
+  # Backend API Service
   - type: web
     name: g4g-search-api
     env: python
-    rootDir: flask-server
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn --bind 0.0.0.0:$PORT system:app"
+    region: oregon
     plan: free
+    buildCommand: cd flask-server && pip install -r requirements.txt
+    startCommand: cd flask-server && gunicorn --bind 0.0.0.0:$PORT system:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.18
+        value: 3.11.0
+      - key: PORT
+        value: 10000
+    
+  # Frontend Static Site
+  - type: static
+    name: g4g-search-frontend
+    buildCommand: cd g4gsearchrec && npm install && npm run build
+    staticPublishPath: ./g4gsearchrec/build
+    region: oregon
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: REACT_APP_API_URL
+        value: https://g4g-search-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
