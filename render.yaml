@@ -12,19 +12,3 @@ services:
         value: 3.11.0
       - key: PORT
         value: 10000
-    
-  # Frontend Static Site
-  - type: static
-    name: g4g-search-frontend
-    buildCommand: cd g4gsearchrec && npm install && npm run build
-    staticPublishPath: ./g4gsearchrec/build
-    region: oregon
-    envVars:
-      - key: NODE_VERSION
-        value: 18.17.0
-      - key: REACT_APP_API_URL
-        value: https://g4g-search-api.onrender.com
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
