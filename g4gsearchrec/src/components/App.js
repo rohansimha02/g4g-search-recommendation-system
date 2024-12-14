@@ -126,7 +126,7 @@ const App = () => {
                         </div>
                         
                         <h1 className="text-5xl font-bold mb-4" style={{color: '#333333'}}>
-                            GeeksforGeeks Study Assistant
+                            Personalized CS Learning Study Assistant
                         </h1>
                         
                         <p className="text-xl mb-2 max-w-3xl mx-auto" style={{color: '#333333'}}>
