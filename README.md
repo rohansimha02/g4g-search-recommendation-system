@@ -66,14 +66,22 @@ Combines **BM25 ranking**, **TF-IDF search**, and a **hybrid machine learning re
 **Search**  
 ```bash
 GET /search?q=python+sorting&limit=5&method=tfidf
+```
+
 **Recommendations**
+```bash
 GET /recommend?title=Selection%20Sort&limit=3
+```
+
 **Health**
+```bash
 GET /health
+```
 
 ---
 
 ## Architecture Overview
+```
 cs-learning-search-rec/
 ├── flask-server/         # Backend API
 │   ├── system.py         # Main Flask app + ML logic
@@ -84,6 +92,7 @@ cs-learning-search-rec/
 ├── data/
 │   └── geeksforgeeks_articles.csv
 └── README.md
+```
 
 **Pipeline:**  
 1. Load and clean article data  
@@ -96,4 +105,5 @@ cs-learning-search-rec/
 
 ## License
 Educational and demonstration purposes only
+
 
